@@ -1,9 +1,10 @@
-﻿using System;
+﻿using LibGit2Sharp.Handlers;
+using LibGit2Sharp.Tests.TestHelpers;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using LibGit2Sharp.Handlers;
-using LibGit2Sharp.Tests.TestHelpers;
 using Xunit;
 using Xunit.Extensions;
 
@@ -37,6 +38,28 @@ namespace LibGit2Sharp.Tests
                 Assert.Equal(repo.Head.Tip.Id.ToString(), "49322bb17d3acc9146f98c97d078513228bbf3c0");
             }
         }
+
+        [Theory]
+        [InlineData("http://github.com/libgit2/TestGitRepository")]
+        [InlineData("https://github.com/libgit2/TestGitRepository")]
+        public void Repository_Clone_Locks_File(string sourceUrl)
+        {
+            var tempDirPath = Path.Combine(
+                Path.GetTempPath(),
+                "LIB_GIT_TEST");
+            Directory.CreateDirectory(tempDirPath);
+
+            Repository.Clone(sourceUrl, tempDirPath);
+            try
+            {
+                Directory.Delete(tempDirPath, true);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+        }
+
 
         [Theory]
         [InlineData("br2", "a4a7dce85cf63874e984719f4fdd239f5145052f")]
